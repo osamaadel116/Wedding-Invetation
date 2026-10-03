@@ -64,21 +64,27 @@ export default function App() {
           },
           weddingDate: {
             ...initialWeddingConfig.weddingDate,
-            ...(parsed.weddingDate || {}),
+            targetIso: '2026-11-20T18:30:00',
+            displayDate: 'Friday, 20 November 2026',
+            dayOfWeek: 'Friday',
           },
           events:
             Array.isArray(parsed.events) && parsed.events.length > 0
-              ? parsed.events.map((ev: any) =>
-                  !ev.venueName || ev.venueName.includes('Glasshouse') || ev.venueName.includes('Ayana')
-                    ? {
-                        ...ev,
-                        venueName: initialWeddingConfig.events[0]?.venueName,
-                        venueAddress: initialWeddingConfig.events[0]?.venueAddress,
-                        mapUrl: initialWeddingConfig.events[0]?.mapUrl,
-                        timezone: initialWeddingConfig.events[0]?.timezone,
-                      }
-                    : ev
-                )
+              ? parsed.events.map((ev: any) => ({
+                  ...ev,
+                  date: 'Friday, 20 November 2026',
+                  dateIso: '2026-11-20T18:30:00',
+                  venueName:
+                    !ev.venueName || ev.venueName.includes('Glasshouse') || ev.venueName.includes('Ayana')
+                      ? initialWeddingConfig.events[0]?.venueName
+                      : ev.venueName,
+                  venueAddress:
+                    !ev.venueAddress || ev.venueAddress.includes('Glasshouse') || ev.venueAddress.includes('Ayana')
+                      ? initialWeddingConfig.events[0]?.venueAddress
+                      : ev.venueAddress,
+                  mapUrl: initialWeddingConfig.events[0]?.mapUrl,
+                  timezone: initialWeddingConfig.events[0]?.timezone,
+                }))
               : initialWeddingConfig.events,
           themes: Array.isArray(parsed.themes) && parsed.themes.length > 0 ? parsed.themes : initialWeddingConfig.themes,
           gallery: Array.isArray(parsed.gallery) && parsed.gallery.length > 0
@@ -167,6 +173,35 @@ export default function App() {
         setIsGoogleSheetsOpen(true);
       }
     }
+  }, []);
+
+  // Guarantee Friday 20 November 2026 across active session and local storage
+  useEffect(() => {
+    setConfig((prev) => {
+      const isDateOutdated =
+        prev.weddingDate?.displayDate !== 'Friday, 20 November 2026' ||
+        prev.events?.[0]?.date !== 'Friday, 20 November 2026';
+      if (!isDateOutdated) return prev;
+
+      const updated = {
+        ...prev,
+        weddingDate: {
+          ...prev.weddingDate,
+          targetIso: '2026-11-20T18:30:00',
+          displayDate: 'Friday, 20 November 2026',
+          dayOfWeek: 'Friday',
+        },
+        events: (prev.events || []).map((ev) => ({
+          ...ev,
+          date: 'Friday, 20 November 2026',
+          dateIso: '2026-11-20T18:30:00',
+        })),
+      };
+      try {
+        localStorage.setItem('wedding_custom_config_v2', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
   }, []);
 
   // Save wishes to localStorage

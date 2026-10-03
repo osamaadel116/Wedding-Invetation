@@ -160,7 +160,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ config, onScrollToNext
             {config.couple.groom.shortName} <span className="font-serif-display text-4xl sm:text-5xl text-[#C5A059]">&</span> {config.couple.bride.shortName}
           </h1>
           <p className="font-serif-display text-base sm:text-lg text-[#6E5D52] tracking-wide mt-1 font-medium">
-            {config.weddingDate.displayDate}
+            {!config.weddingDate.displayDate || config.weddingDate.displayDate.toLowerCase().includes('october') || !config.weddingDate.displayDate.includes('November')
+              ? 'Friday, 20 November 2026'
+              : config.weddingDate.displayDate}
           </p>
         </motion.div>
 

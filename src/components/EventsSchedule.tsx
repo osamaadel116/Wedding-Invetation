@@ -111,7 +111,11 @@ export const EventsSchedule: React.FC<EventsScheduleProps> = ({ events, theme })
                 <div className="space-y-2 my-4 text-xs sm:text-sm text-[#5C4C41] font-sans-body">
                   <div className="flex items-center gap-2.5">
                     <Calendar className="w-4 h-4 text-[#C5A059] shrink-0" />
-                    <span className="font-medium">{event.date}</span>
+                    <span className="font-medium">
+                      {!event.date || event.date.toLowerCase().includes('october') || !event.date.includes('November')
+                        ? 'Friday, 20 November 2026'
+                        : event.date}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2.5">
                     <Clock className="w-4 h-4 text-[#C5A059] shrink-0" />

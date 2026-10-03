@@ -52,9 +52,9 @@ const baseWeddingConfig: WeddingConfig = {
 
   // 2. WEDDING DATE & COUNTDOWN TARGET
   weddingDate: {
-    targetIso: '2026-10-24T10:00:00', // Format: YYYY-MM-DDTHH:mm:ss
-    displayDate: 'Saturday, 24 October 2026',
-    dayOfWeek: 'Saturday',
+    targetIso: '2026-11-20T18:30:00', // Format: YYYY-MM-DDTHH:mm:ss
+    displayDate: 'Friday, 20 November 2026',
+    dayOfWeek: 'Friday',
   },
 
   // 3. EVENT AGENDAS & VENUES (Wedding Reception)
@@ -63,8 +63,8 @@ const baseWeddingConfig: WeddingConfig = {
       id: 'reception',
       title: 'Wedding Reception',
       subtitle: 'Celebration, Dining & Toast',
-      date: 'Saturday, 24 October 2026',
-      dateIso: '2026-10-24T18:30:00',
+      date: 'Friday, 20 November 2026',
+      dateIso: '2026-11-20T18:30:00',
       startTime: '06:30 PM',
       endTime: '09:30 PM',
       timezone: 'GMT+2',

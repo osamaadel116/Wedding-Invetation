@@ -129,7 +129,9 @@ export const OpeningEnvelopeModal: React.FC<OpeningEnvelopeModalProps> = ({
 
             {/* Wedding Date Display */}
             <p className="font-serif-display text-sm tracking-wider text-[#736357] uppercase font-semibold mt-1">
-              {config.weddingDate.displayDate}
+              {!config.weddingDate.displayDate || config.weddingDate.displayDate.toLowerCase().includes('october') || !config.weddingDate.displayDate.includes('November')
+                ? 'Friday, 20 November 2026'
+                : config.weddingDate.displayDate}
             </p>
 
             {/* Guest Personalization Box */}
