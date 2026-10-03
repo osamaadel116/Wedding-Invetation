@@ -1,0 +1,8 @@
+{
+  "name": "wedding invetation",
+  "description": "A responsive digital wedding invitation featuring watercolor floral decorations, music player, RSVP, countdown, timeline, and customizable configuration.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

@@ -1,0 +1,137 @@
+{
+  "entities": {
+    "Rsvp": {
+      "title": "Rsvp",
+      "description": "Wedding RSVP submission from an invited guest.",
+      "type": "object",
+      "properties": {
+        "guestName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Name of the guest submitting RSVP"
+        },
+        "attendance": {
+          "type": "string",
+          "enum": ["yes", "no", "maybe"],
+          "description": "Attendance status"
+        },
+        "guestCount": {
+          "type": "number",
+          "description": "Total number of guests attending (1 to 10)"
+        },
+        "eventsAttending": {
+          "type": "array",
+          "description": "List of wedding events attending"
+        },
+        "dietary": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "Dietary requirements or restrictions"
+        },
+        "message": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Optional warm message to the couple"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when RSVP was submitted"
+        }
+      },
+      "required": ["guestName", "attendance", "guestCount", "createdAt"]
+    },
+    "Wish": {
+      "title": "Wish",
+      "description": "Guestbook wish or blessing for the couple.",
+      "type": "object",
+      "properties": {
+        "senderName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "description": "Name of the person sending wishes"
+        },
+        "relationship": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "Relationship to bride or groom"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 600,
+          "description": "Heartfelt message or blessing"
+        },
+        "likes": {
+          "type": "number",
+          "description": "Number of reactions/likes"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when wish was posted"
+        }
+      },
+      "required": ["senderName", "message", "likes", "createdAt"]
+    },
+    "WeddingConfig": {
+      "title": "WeddingConfig",
+      "description": "Live configuration and personalization details for the wedding invitation.",
+      "type": "object",
+      "properties": {
+        "brideName": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "Bride's first name"
+        },
+        "groomName": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "Groom's first name"
+        },
+        "weddingDate": {
+          "type": "string",
+          "maxLength": 60,
+          "description": "Formatted date of the wedding"
+        },
+        "floralTheme": {
+          "type": "string",
+          "maxLength": 50,
+          "description": "Active botanical floral theme"
+        },
+        "venueName": {
+          "type": "string",
+          "maxLength": 150,
+          "description": "Name of venue"
+        },
+        "venueAddress": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "Address of venue"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of last update"
+        }
+      },
+      "required": ["brideName", "groomName", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/rsvps/{rsvpId}": {
+      "schema": "Rsvp",
+      "description": "Guest RSVP records for the wedding."
+    },
+    "/wishes/{wishId}": {
+      "schema": "Wish",
+      "description": "Guestbook wishes and congratulations."
+    },
+    "/weddingConfig/{configId}": {
+      "schema": "WeddingConfig",
+      "description": "Global live configuration and customizable elements for the wedding invitation."
+    }
+  }
+}

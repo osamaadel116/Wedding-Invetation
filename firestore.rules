@@ -1,0 +1,105 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Safety Net: Default-deny all undefined paths
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Hardened Global Helpers
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isHostAdmin() {
+      return isSignedIn() &&
+        request.auth.token.email == 'osos11886@gmail.com' &&
+        request.auth.token.email_verified == true;
+    }
+
+    // Validation Blueprint for RSVP
+    function isValidRsvp(data) {
+      return data.keys().hasAll(['guestName', 'attendance', 'guestCount', 'createdAt']) &&
+        data.keys().hasOnly(['guestName', 'attendance', 'guestCount', 'eventsAttending', 'dietary', 'message', 'createdAt']) &&
+        data.guestName is string && data.guestName.size() >= 1 && data.guestName.size() <= 100 &&
+        data.attendance is string && (data.attendance == 'yes' || data.attendance == 'no' || data.attendance == 'maybe') &&
+        data.guestCount is number && data.guestCount >= 1 && data.guestCount <= 10 &&
+        (!('eventsAttending' in data) || data.eventsAttending is list) &&
+        (!('dietary' in data) || (data.dietary is string && data.dietary.size() <= 300)) &&
+        (!('message' in data) || (data.message is string && data.message.size() <= 500));
+    }
+
+    // Validation Blueprint for Wishes
+    function isValidWish(data) {
+      return data.keys().hasAll(['senderName', 'message', 'likes', 'createdAt']) &&
+        data.keys().hasOnly(['senderName', 'relationship', 'message', 'likes', 'createdAt']) &&
+        data.senderName is string && data.senderName.size() >= 1 && data.senderName.size() <= 80 &&
+        data.message is string && data.message.size() >= 1 && data.message.size() <= 600 &&
+        data.likes is number && data.likes >= 0 &&
+        (!('relationship' in data) || (data.relationship is string && data.relationship.size() <= 50));
+    }
+
+    // Validation Blueprint for Wedding Configuration
+    function isValidWeddingConfig(data) {
+      return data.keys().hasAll(['brideName', 'groomName', 'updatedAt']) &&
+        data.keys().hasOnly(['brideName', 'groomName', 'weddingDate', 'floralTheme', 'venueName', 'venueAddress', 'updatedAt']) &&
+        data.brideName is string && data.brideName.size() >= 1 && data.brideName.size() <= 80 &&
+        data.groomName is string && data.groomName.size() >= 1 && data.groomName.size() <= 80 &&
+        (!('weddingDate' in data) || (data.weddingDate is string && data.weddingDate.size() <= 60)) &&
+        (!('floralTheme' in data) || (data.floralTheme is string && data.floralTheme.size() <= 50)) &&
+        (!('venueName' in data) || (data.venueName is string && data.venueName.size() <= 150)) &&
+        (!('venueAddress' in data) || (data.venueAddress is string && data.venueAddress.size() <= 200));
+    }
+
+    // 1. RSVPs Collection
+    match /rsvps/{rsvpId} {
+      allow get, list: if isHostAdmin();
+      allow create: if isValidId(rsvpId) &&
+        isValidRsvp(incoming()) &&
+        incoming().createdAt == request.time;
+      allow update, delete: if isHostAdmin();
+    }
+
+    // 2. Guestbook Wishes Collection
+    match /wishes/{wishId} {
+      allow get, list: if true;
+      allow create: if isValidId(wishId) &&
+        isValidWish(incoming()) &&
+        incoming().likes == 0 &&
+        incoming().createdAt == request.time;
+      allow update: if isValidId(wishId) &&
+        isValidWish(incoming()) &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['likes']) &&
+        incoming().likes == existing().likes + 1;
+      allow delete: if isHostAdmin();
+    }
+
+    // 3. Live Wedding Configuration Collection
+    match /weddingConfig/{configId} {
+      allow get, list: if true;
+      allow create, update: if isHostAdmin() &&
+        isValidId(configId) &&
+        isValidWeddingConfig(incoming()) &&
+        incoming().updatedAt == request.time;
+      allow delete: if isHostAdmin();
+    }
+
+    // 4. Test Connection Verification Doc
+    match /test/{docId} {
+      allow get: if true;
+    }
+  }
+}
