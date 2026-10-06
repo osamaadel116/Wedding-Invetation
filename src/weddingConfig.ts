@@ -72,7 +72,7 @@ const baseWeddingConfig: WeddingConfig = {
       venueAddress: 'Saqqara Tourist Road, Mariouteya, Giza, Egypt (طريق سقارة السياحي - المريوطية)',
       mapUrl: 'https://maps.google.com/?q=New+Land+Resort+Mariouteya+Giza',
       mapEmbedQuery: 'New Land Resort Mariouteya Giza',
-      notes: 'Valet parking available at Main Gate. Formal & Cocktail Attire.',
+      notes: '',
       iconType: 'celebration',
     },
   ],

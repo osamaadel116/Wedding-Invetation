@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Calendar, Clock, MapPin, Copy, Check, ExternalLink, Map, AlertCircle } from 'lucide-react';
+import { Calendar, Clock, MapPin, Copy, Check, ExternalLink, Map } from 'lucide-react';
 import { WeddingEvent, FloralTheme } from '../types';
 import { WatercolorDivider, WatercolorCorner } from './WatercolorFlorals';
 import { BotanicalRoseHeaderOrnament } from './BotanicalRoseDecorations';
@@ -135,14 +135,6 @@ export const EventsSchedule: React.FC<EventsScheduleProps> = ({ events, theme })
                     </div>
                   </div>
                 </div>
-
-                {/* Special Event Notes */}
-                {event.notes && (
-                  <div className="p-3 bg-[#F2EAE0] rounded-xl border border-[#E0D4C5] my-4 flex items-start gap-2 text-xs text-[#6E5E53]">
-                    <AlertCircle className="w-4 h-4 text-[#C5A059] shrink-0 mt-0.5" />
-                    <p className="italic leading-snug">{event.notes}</p>
-                  </div>
-                )}
               </div>
 
               {/* Action Buttons: Copy Address & Google Maps */}
