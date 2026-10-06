@@ -1,39 +1,4 @@
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import {
-  getFirestore,
-  doc,
-  getDocFromServer,
-  collection,
-  addDoc,
-  getDocs,
-  onSnapshot,
-  updateDoc,
-  serverTimestamp,
-  increment,
-  query,
-  orderBy,
-  limit,
-  setDoc,
-} from 'firebase/firestore';
-import firebaseConfig from '../../firebase-applet-config.json';
-import { RsvpData, GuestWish } from '../types';
-
-// Initialize Firebase App with safe fallbacks
-let appInstance = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-let dbInstance: ReturnType<typeof getFirestore>;
-try {
-  dbInstance = firebaseConfig.firestoreDatabaseId
-    ? getFirestore(appInstance, firebaseConfig.firestoreDatabaseId)
-    : getFirestore(appInstance);
-} catch (e) {
-  console.warn('Firestore initialization fallback:', e);
-  dbInstance = getFirestore(appInstance);
-}
-
-export const app = appInstance;
-export const db = dbInstance;
-export const auth = getAuth(appInstance);
+import { GuestWish } from '../types';
 
 export enum OperationType {
   CREATE = 'create',
@@ -51,31 +16,13 @@ export interface FirestoreErrorInfo {
   authInfo: {
     userId?: string | null;
     email?: string | null;
-    emailVerified?: boolean | null;
-    isAnonymous?: boolean | null;
-    tenantId?: string | null;
-    providerInfo?: {
-      providerId?: string | null;
-      email?: string | null;
-    }[];
   };
 }
 
 export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null): never {
   const errInfo: FirestoreErrorInfo = {
     error: error instanceof Error ? error.message : String(error),
-    authInfo: {
-      userId: auth.currentUser?.uid,
-      email: auth.currentUser?.email,
-      emailVerified: auth.currentUser?.emailVerified,
-      isAnonymous: auth.currentUser?.isAnonymous,
-      tenantId: auth.currentUser?.tenantId,
-      providerInfo:
-        auth.currentUser?.providerData?.map((provider) => ({
-          providerId: provider.providerId,
-          email: provider.email,
-        })) || [],
-    },
+    authInfo: {},
     operationType,
     path,
   };
@@ -83,26 +30,38 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
   throw new Error(JSON.stringify(errInfo));
 }
 
-// Test Connection on load as per skill requirements
-export async function testConnection() {
-  const testPath = 'test/connection';
+// In-memory + LocalStorage wishes store
+const WISHES_STORAGE_KEY = 'wedding_wishes_db_v1';
+const RSVPS_STORAGE_KEY = 'wedding_rsvps_db_v1';
+
+function getStoredWishes(): GuestWish[] {
   try {
-    await getDocFromServer(doc(db, 'test', 'connection'));
-  } catch (error) {
-    if (error instanceof Error && error.message.includes('the client is offline')) {
-      console.error('Please check your Firebase configuration.');
-    }
-    // We do not rethrow on initial test if doc is empty, just test connectivity
+    const raw = localStorage.getItem(WISHES_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
   }
 }
 
-// Automatically trigger connection test
-testConnection();
+function saveStoredWishes(wishes: GuestWish[]) {
+  try {
+    localStorage.setItem(WISHES_STORAGE_KEY, JSON.stringify(wishes));
+  } catch {}
+}
 
-// --- Firestore Services for Wedding RSVP, Wishes, and Config ---
+const listeners: Array<(wishes: GuestWish[]) => void> = [];
+
+function notifyListeners() {
+  const current = getStoredWishes();
+  listeners.forEach((listener) => {
+    try {
+      listener(current);
+    } catch {}
+  });
+}
 
 /**
- * Submit an RSVP to Firestore
+ * Submit an RSVP to storage
  */
 export async function submitRsvpToFirestore(data: {
   guestName: string;
@@ -112,106 +71,79 @@ export async function submitRsvpToFirestore(data: {
   dietary?: string;
   message?: string;
 }) {
-  const collectionPath = 'rsvps';
   try {
-    const docRef = await addDoc(collection(db, collectionPath), {
-      guestName: data.guestName.trim(),
-      attendance: data.attendance,
-      guestCount: Math.min(Math.max(Number(data.guestCount) || 1, 1), 10),
-      eventsAttending: data.eventsAttending || [],
-      dietary: (data.dietary || '').slice(0, 300),
-      message: (data.message || '').slice(0, 500),
-      createdAt: serverTimestamp(),
-    });
-    return docRef.id;
+    const rsvps = JSON.parse(localStorage.getItem(RSVPS_STORAGE_KEY) || '[]');
+    const newRsvp = {
+      id: 'rsvp-' + Date.now(),
+      ...data,
+      createdAt: new Date().toISOString(),
+    };
+    rsvps.push(newRsvp);
+    localStorage.setItem(RSVPS_STORAGE_KEY, JSON.stringify(rsvps));
+    return newRsvp.id;
   } catch (error) {
-    handleFirestoreError(error, OperationType.CREATE, collectionPath);
+    console.warn('Local RSVP save note:', error);
+    return 'local-' + Date.now();
   }
 }
 
 /**
- * Subscribe to real-time Guestbook Wishes from Firestore
+ * Subscribe to real-time Guestbook Wishes
  */
 export function subscribeToWishes(onUpdate: (wishes: GuestWish[]) => void) {
-  const collectionPath = 'wishes';
-  const q = query(collection(db, collectionPath), orderBy('createdAt', 'desc'), limit(50));
+  listeners.push(onUpdate);
+  onUpdate(getStoredWishes());
 
-  return onSnapshot(
-    q,
-    (snapshot) => {
-      const items: GuestWish[] = snapshot.docs.map((docSnap) => {
-        const d = docSnap.data();
-        let formattedDate = 'Just now';
-        if (d.createdAt && typeof d.createdAt.toDate === 'function') {
-          const dateObj = d.createdAt.toDate();
-          formattedDate = dateObj.toLocaleDateString(undefined, {
-            month: 'short',
-            day: 'numeric',
-            year: 'numeric',
-          });
-        }
-        return {
-          id: docSnap.id,
-          senderName: d.senderName || 'Anonymous',
-          relationship: d.relationship || 'Guest',
-          message: d.message || '',
-          timestamp: formattedDate,
-          attendance: (d.attendance as 'attending' | 'declined' | 'uncertain') || 'attending',
-          likesCount: d.likes || 0,
-        };
-      });
-      onUpdate(items);
-    },
-    (error) => {
-      try {
-        handleFirestoreError(error, OperationType.LIST, collectionPath);
-      } catch (e) {
-        console.warn('Wishes sync subscription note:', e);
-      }
-    }
-  );
+  return () => {
+    const idx = listeners.indexOf(onUpdate);
+    if (idx !== -1) listeners.splice(idx, 1);
+  };
 }
 
 /**
- * Post a new Wish to Firestore
+ * Post a new Wish
  */
 export async function addWishToFirestore(data: {
   senderName: string;
   relationship: string;
   message: string;
 }) {
-  const collectionPath = 'wishes';
-  try {
-    const docRef = await addDoc(collection(db, collectionPath), {
-      senderName: data.senderName.trim().slice(0, 80),
-      relationship: (data.relationship || 'Guest').trim().slice(0, 50),
-      message: data.message.trim().slice(0, 600),
-      likes: 0,
-      createdAt: serverTimestamp(),
-    });
-    return docRef.id;
-  } catch (error) {
-    handleFirestoreError(error, OperationType.CREATE, collectionPath);
-  }
+  const wishes = getStoredWishes();
+  const dateStr = new Date().toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+  const newWish: GuestWish = {
+    id: 'wish-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+    senderName: data.senderName.trim().slice(0, 80),
+    relationship: (data.relationship || 'Guest').trim().slice(0, 50),
+    message: data.message.trim().slice(0, 600),
+    timestamp: dateStr,
+    attendance: 'attending',
+    likesCount: 0,
+  };
+  wishes.unshift(newWish);
+  saveStoredWishes(wishes);
+  notifyListeners();
+  return newWish.id;
 }
 
 /**
- * Like a wish in Firestore (increments like counter atomically)
+ * Like a wish
  */
 export async function likeWishInFirestore(wishId: string) {
-  const docPath = `wishes/${wishId}`;
-  try {
-    const wishRef = doc(db, 'wishes', wishId);
-    await updateDoc(wishRef, {
-      likes: increment(1),
-    });
-  } catch (error) {
-    handleFirestoreError(error, OperationType.UPDATE, docPath);
+  const wishes = getStoredWishes();
+  const target = wishes.find((w) => w.id === wishId);
+  if (target) {
+    target.likesCount = (target.likesCount || 0) + 1;
+    saveStoredWishes(wishes);
+    notifyListeners();
   }
 }
 
 /**
- * Save live wedding config to Firestore (Host / Admin feature)
+ * Save live wedding config
  */
 export async function saveWeddingConfigToFirestore(configData: {
   brideName: string;
@@ -221,26 +153,7 @@ export async function saveWeddingConfigToFirestore(configData: {
   venueName?: string;
   venueAddress?: string;
 }) {
-  if (!auth.currentUser || auth.currentUser.email !== 'osos11886@gmail.com') {
-    return;
-  }
-  const docPath = 'weddingConfig/main';
   try {
-    const configRef = doc(db, 'weddingConfig', 'main');
-    await setDoc(
-      configRef,
-      {
-        brideName: configData.brideName.slice(0, 80),
-        groomName: configData.groomName.slice(0, 80),
-        weddingDate: (configData.weddingDate || '').slice(0, 60),
-        floralTheme: (configData.floralTheme || '').slice(0, 50),
-        venueName: (configData.venueName || '').slice(0, 150),
-        venueAddress: (configData.venueAddress || '').slice(0, 200),
-        updatedAt: serverTimestamp(),
-      },
-      { merge: true }
-    );
-  } catch (error) {
-    handleFirestoreError(error, OperationType.WRITE, docPath);
-  }
+    localStorage.setItem('wedding_custom_config_v2', JSON.stringify(configData));
+  } catch {}
 }

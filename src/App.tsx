@@ -15,9 +15,8 @@ import { EventsSchedule } from './components/EventsSchedule';
 import { GuestbookSection } from './components/GuestbookSection';
 import { FooterSection } from './components/FooterSection';
 import { LiveConfigEditorModal } from './components/LiveConfigEditorModal';
-import { GoogleSheetsManager } from './components/GoogleSheetsManager';
 import { FallingPetals } from './components/WatercolorFlorals';
-import { SlidersHorizontal, FileSpreadsheet } from 'lucide-react';
+import { SlidersHorizontal } from 'lucide-react';
 import {
   subscribeToWishes,
   likeWishInFirestore,
@@ -153,7 +152,6 @@ export default function App() {
 
   // Modal customizer state (hidden by default)
   const [isCustomizerOpen, setIsCustomizerOpen] = useState(false);
-  const [isGoogleSheetsOpen, setIsGoogleSheetsOpen] = useState(false);
   const [isMobilePreview, setIsMobilePreview] = useState(false);
   const [showFallingPetals, setShowFallingPetals] = useState(true);
   const [showEditButton, setShowEditButton] = useState(false);
@@ -168,9 +166,6 @@ export default function App() {
       }
       if (params.get('edit') === 'true' || params.get('admin') === 'true') {
         setShowEditButton(true);
-      }
-      if (params.get('sheets') === 'true') {
-        setIsGoogleSheetsOpen(true);
       }
     }
   }, []);
@@ -225,17 +220,19 @@ export default function App() {
     }
   }, []);
 
-  // Automatically sync local browser customization to codebase so production gets it
+  // Automatically sync local browser customization to codebase in local dev mode
   useEffect(() => {
-    const saved = localStorage.getItem('wedding_custom_config');
-    if (saved) {
-      try {
-        fetch('/api/save-wedding-config', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: saved,
-        }).catch(() => {});
-      } catch {}
+    if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+      const saved = localStorage.getItem('wedding_custom_config');
+      if (saved) {
+        try {
+          fetch('/api/save-wedding-config', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: saved,
+          }).catch(() => {});
+        } catch {}
+      }
     }
   }, []);
 
@@ -373,7 +370,7 @@ export default function App() {
         accentColor={activeTheme.primaryColor}
       />
 
-      {/* Top Quick Bar for Google Sheets & Customizer */}
+      {/* Top Quick Bar for Live Customizer */}
       {showEditButton && (
         <motion.div
           initial={{ opacity: 0, y: -12 }}
@@ -381,16 +378,6 @@ export default function App() {
           transition={{ duration: 0.8, delay: 0.35, ease: 'easeOut' }}
           className="fixed top-5 right-4 z-50 flex items-center gap-2"
         >
-          {/* Google Sheets RSVP Sync Button */}
-          <button
-            onClick={() => setIsGoogleSheetsOpen(true)}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#2C2420]/90 backdrop-blur-md border border-emerald-500/70 text-emerald-300 hover:text-white text-xs font-semibold shadow-md hover:bg-[#3D2B24] transition-all cursor-pointer"
-            title="Google Sheets RSVP & Attendance"
-          >
-            <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
-            <span className="hidden sm:inline">Google Sheets</span>
-          </button>
-
           {/* Live Edit Details Button */}
           <button
             onClick={() => setIsCustomizerOpen(true)}
@@ -458,16 +445,6 @@ export default function App() {
         onToggleMobilePreview={() => setIsMobilePreview(!isMobilePreview)}
         showFallingPetals={showFallingPetals}
         onToggleFallingPetals={() => setShowFallingPetals(!showFallingPetals)}
-        onOpenGoogleSheets={() => {
-          setIsCustomizerOpen(false);
-          setIsGoogleSheetsOpen(true);
-        }}
-      />
-
-      {/* Google Sheets RSVP & Attendance Manager Modal */}
-      <GoogleSheetsManager
-        isOpen={isGoogleSheetsOpen}
-        onClose={() => setIsGoogleSheetsOpen(false)}
       />
     </div>
   );
