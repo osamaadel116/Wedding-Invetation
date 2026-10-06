@@ -1,0 +1,64 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Redirect Trailing Slashes If not a Folder...
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_URI} (.+)/$
+  RewriteRule ^ %1 [L,R=301]
+
+  # Send Requests To Front Controller (Single Page Application Fallback)
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+# Enable GZIP / Brotli Compression
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/x-javascript application/json application/xml font/woff font/woff2 image/svg+xml
+</IfModule>
+
+# Leverage Browser Caching for static assets
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresDefault "access plus 1 month"
+
+  # HTML files - do not cache heavily so updates show immediately
+  ExpiresByType text/html "access plus 0 seconds"
+
+  # CSS, JavaScript
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType text/javascript "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType application/x-javascript "access plus 1 year"
+
+  # Images and Media
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/jpg "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/gif "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType image/x-icon "access plus 1 year"
+  ExpiresByType audio/mpeg "access plus 1 year"
+  ExpiresByType audio/mp3 "access plus 1 year"
+  ExpiresByType audio/wav "access plus 1 year"
+
+  # Web Fonts
+  ExpiresByType font/ttf "access plus 1 year"
+  ExpiresByType font/woff "access plus 1 year"
+  ExpiresByType font/woff2 "access plus 1 year"
+  ExpiresByType application/font-woff "access plus 1 year"
+  ExpiresByType application/font-woff2 "access plus 1 year"
+</IfModule>
+
+# Security Headers & MIME Types
+<IfModule mod_headers.c>
+  # Prevent MIME type sniffing
+  Header set X-Content-Type-Options "nosniff"
+  # Referrer Policy
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Set UTF-8 Default Charset
+AddDefaultCharset UTF-8
