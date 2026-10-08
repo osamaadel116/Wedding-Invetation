@@ -285,5 +285,15 @@ export const weddingConfig: WeddingConfig = {
     Array.isArray(rawCustom?.musicTracks) && rawCustom.musicTracks.length > 0
       ? rawCustom.musicTracks
       : baseWeddingConfig.musicTracks,
+  gallery: [
+    {
+      ...baseWeddingConfig.gallery[0],
+      url: heroPhoto,
+    },
+    ...baseWeddingConfig.gallery.slice(1).map((item, idx) => ({
+      ...item,
+      ...(rawCustom?.gallery?.[idx + 1] || {}),
+    })),
+  ],
 };
 

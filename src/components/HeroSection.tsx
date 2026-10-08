@@ -4,6 +4,7 @@ import { Calendar, Clock, MapPin, Sparkles, ChevronDown, Heart } from 'lucide-re
 import { WeddingConfig } from '../types';
 import { WatercolorCorner, WatercolorWreath, WatercolorDivider } from './WatercolorFlorals';
 import { BotanicalRoseFrameCorner, BotanicalRoseArchCrown, GoldenRococoOvalFrame } from './BotanicalRoseDecorations';
+import heroPhoto from '../assets/images/regenerated_image_1788214150346.jpg';
 
 interface HeroSectionProps {
   config: WeddingConfig;
@@ -126,8 +127,20 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ config, onScrollToNext
               style={{ borderRadius: '50% / 50%' }}
             >
               <img
-                src={config.gallery[0]?.url || config.couple.groom.photoUrl}
+                src={
+                  config.gallery[0]?.url &&
+                  !config.gallery[0].url.startsWith('/src/') &&
+                  !config.gallery[0].url.includes('regenerated_image_1788214150346')
+                    ? config.gallery[0].url
+                    : heroPhoto
+                }
                 alt="The Happy Couple"
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  if (target.src !== heroPhoto) {
+                    target.src = heroPhoto;
+                  }
+                }}
                 referrerPolicy="no-referrer"
                 className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
               />

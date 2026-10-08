@@ -18,7 +18,7 @@
       "fatherName": "Mr. Emad",
       "motherName": "Mrs. Emad",
       "bio": "An architectural designer with an obsession for classic jazz, morning pour-overs, and Aya’s laughter.",
-      "photoUrl": "/src/assets/images/regenerated_image_1788214059017.jpg"
+      "photoUrl": ""
     },
     "bride": {
       "name": "Aya Salah",
@@ -28,7 +28,7 @@
       "fatherName": "Mr. Salah",
       "motherName": "Mrs. Salah",
       "bio": "A botanical illustrator with a heart for vintage novels, tea ceremonies, and traveling the world with Omar.",
-      "photoUrl": "/src/assets/images/regenerated_image_1788213800123.png"
+      "photoUrl": ""
     }
   },
   "weddingDate": {
@@ -155,7 +155,7 @@
   "gallery": [
     {
       "id": "g1",
-      "url": "/src/assets/images/regenerated_image_1788214150346.jpg",
+      "url": "",
       "caption": "Golden hour sunset stroll by the countryside.",
       "featured": true
     },

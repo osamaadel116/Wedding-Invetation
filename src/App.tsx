@@ -50,12 +50,21 @@ export default function App() {
               ...(parsed.couple?.groom || {}),
               photoUrl:
                 parsed.couple?.groom?.photoUrl &&
+                !parsed.couple.groom.photoUrl.startsWith('/src/') &&
                 !parsed.couple.groom.photoUrl.includes('photo-1507003211169') &&
                 !parsed.couple.groom.photoUrl.includes('photo-1506794778202')
                   ? parsed.couple.groom.photoUrl
                   : initialWeddingConfig.couple.groom.photoUrl,
             },
-            bride: { ...initialWeddingConfig.couple.bride, ...(parsed.couple?.bride || {}) },
+            bride: {
+              ...initialWeddingConfig.couple.bride,
+              ...(parsed.couple?.bride || {}),
+              photoUrl:
+                parsed.couple?.bride?.photoUrl &&
+                !parsed.couple.bride.photoUrl.startsWith('/src/')
+                  ? parsed.couple.bride.photoUrl
+                  : initialWeddingConfig.couple.bride.photoUrl,
+            },
             quote:
               parsed.couple?.quote?.source === 'Colossians 3:14' || !parsed.couple?.quote?.arabicText || parsed.couple?.quote?.text?.includes('tranquility in them')
                 ? initialWeddingConfig.couple.quote
@@ -88,7 +97,7 @@ export default function App() {
           themes: Array.isArray(parsed.themes) && parsed.themes.length > 0 ? parsed.themes : initialWeddingConfig.themes,
           gallery: Array.isArray(parsed.gallery) && parsed.gallery.length > 0
             ? parsed.gallery.map((g: any, i: number) =>
-                i === 0 && (g.url?.includes('photo-1519741497674') || g.url?.includes('hero.jpg'))
+                i === 0 || !g.url || g.url.startsWith('/src/') || g.url.includes('regenerated_image_1788214150346')
                   ? { ...g, url: initialWeddingConfig.gallery[0]?.url }
                   : g
               )
