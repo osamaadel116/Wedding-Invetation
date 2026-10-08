@@ -1,0 +1,44 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Health check & connection validation
+    match /test/connection {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Public Guestbook Wishes
+    match /wishes/{wishId} {
+      allow read: if true;
+
+      // Allow any guest to submit a warm wedding blessing
+      allow create: if request.resource.data.senderName is string
+                    && request.resource.data.senderName.size() > 0
+                    && request.resource.data.senderName.size() <= 80
+                    && request.resource.data.message is string
+                    && request.resource.data.message.size() > 0
+                    && request.resource.data.message.size() <= 600
+                    && (request.resource.data.relationship == null || (request.resource.data.relationship is string && request.resource.data.relationship.size() <= 50))
+                    && request.resource.data.likes == 0;
+
+      // Allow guests to like/heart a wish (increment only)
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes'])
+                    && request.resource.data.likes == resource.data.likes + 1;
+
+      allow delete: if false;
+    }
+
+    // Guest RSVP Confirmations
+    match /rsvps/{rsvpId} {
+      allow read: if false; // Private to protect guest details and phone numbers
+      allow create: if request.resource.data.guestName is string
+                    && request.resource.data.guestName.size() > 0
+                    && request.resource.data.guestName.size() <= 80
+                    && request.resource.data.attendance in ['yes', 'no', 'maybe']
+                    && request.resource.data.guestCount is int
+                    && request.resource.data.guestCount >= 1
+                    && request.resource.data.guestCount <= 10;
+      allow update, delete: if false;
+    }
+  }
+}

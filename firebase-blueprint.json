@@ -1,0 +1,89 @@
+{
+  "entities": {
+    "GuestWish": {
+      "title": "GuestWish",
+      "description": "Heartfelt warm blessings and wedding wishes from guests",
+      "type": "object",
+      "properties": {
+        "senderName": {
+          "type": "string",
+          "description": "Full name of the guest leaving the blessing",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "relationship": {
+          "type": "string",
+          "description": "Relationship to the couple (Friend, Family, Colleague, etc.)",
+          "minLength": 1,
+          "maxLength": 50
+        },
+        "message": {
+          "type": "string",
+          "description": "Congratulatory message or prayer",
+          "minLength": 1,
+          "maxLength": 600
+        },
+        "likes": {
+          "type": "number",
+          "description": "Count of hearts / likes received from other visitors"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the wish was submitted"
+        }
+      },
+      "required": ["senderName", "message", "likes"]
+    },
+    "RsvpSubmission": {
+      "title": "RsvpSubmission",
+      "description": "Attendance confirmation submitted by a guest",
+      "type": "object",
+      "properties": {
+        "guestName": {
+          "type": "string",
+          "description": "Full name of the RSVP submitter",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "attendance": {
+          "type": "string",
+          "enum": ["yes", "no", "maybe"],
+          "description": "Attendance status"
+        },
+        "guestCount": {
+          "type": "number",
+          "description": "Number of attending guests"
+        },
+        "eventsAttending": {
+          "type": "array",
+          "description": "List of wedding event IDs the guest will attend"
+        },
+        "dietary": {
+          "type": "string",
+          "description": "Dietary preferences or allergies"
+        },
+        "message": {
+          "type": "string",
+          "description": "Optional note accompanying the RSVP"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when RSVP was submitted"
+        }
+      },
+      "required": ["guestName", "attendance", "guestCount"]
+    }
+  },
+  "firestore": {
+    "/wishes/{wishId}": {
+      "schema": "GuestWish",
+      "description": "Public guestbook wishes and live heart counts"
+    },
+    "/rsvps/{rsvpId}": {
+      "schema": "RsvpSubmission",
+      "description": "Guest RSVP attendance records"
+    }
+  }
+}

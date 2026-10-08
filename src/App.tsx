@@ -217,7 +217,7 @@ export default function App() {
   useEffect(() => {
     try {
       const unsubscribe = subscribeToWishes((remoteWishes) => {
-        if (remoteWishes && remoteWishes.length > 0) {
+        if (remoteWishes) {
           setWishes(remoteWishes);
         }
       });
