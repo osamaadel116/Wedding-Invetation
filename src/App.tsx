@@ -48,24 +48,12 @@ export default function App() {
             groom: {
               ...initialWeddingConfig.couple.groom,
               ...(parsed.couple?.groom || {}),
-              photoUrl:
-                (typeof window !== 'undefined' && localStorage.getItem('wedding_custom_groom_photo')) ||
-                (parsed.couple?.groom?.photoUrl &&
-                !parsed.couple.groom.photoUrl.startsWith('/src/') &&
-                !parsed.couple.groom.photoUrl.includes('photo-1507003211169') &&
-                !parsed.couple.groom.photoUrl.includes('photo-1506794778202')
-                  ? parsed.couple.groom.photoUrl
-                  : initialWeddingConfig.couple.groom.photoUrl),
+              photoUrl: initialWeddingConfig.couple.groom.photoUrl,
             },
             bride: {
               ...initialWeddingConfig.couple.bride,
               ...(parsed.couple?.bride || {}),
-              photoUrl:
-                (typeof window !== 'undefined' && localStorage.getItem('wedding_custom_bride_photo')) ||
-                (parsed.couple?.bride?.photoUrl &&
-                !parsed.couple.bride.photoUrl.startsWith('/src/')
-                  ? parsed.couple.bride.photoUrl
-                  : initialWeddingConfig.couple.bride.photoUrl),
+              photoUrl: initialWeddingConfig.couple.bride.photoUrl,
             },
             quote:
               parsed.couple?.quote?.source === 'Colossians 3:14' || !parsed.couple?.quote?.arabicText || parsed.couple?.quote?.text?.includes('tranquility in them')

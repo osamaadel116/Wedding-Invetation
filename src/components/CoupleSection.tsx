@@ -81,7 +81,7 @@ export const CoupleSection: React.FC<CoupleSectionProps> = ({
                     src={couple.groom.photoUrl}
                     alt={couple.groom.name}
                     referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                    className="w-full h-full object-cover object-[center_15%] transition-transform duration-1000 group-hover:scale-105"
                   />
                   <div
                     className="absolute inset-0 shadow-[inset_0_0_15px_rgba(0,0,0,0.1)] pointer-events-none"
@@ -134,7 +134,7 @@ export const CoupleSection: React.FC<CoupleSectionProps> = ({
                     src={couple.bride.photoUrl}
                     alt={couple.bride.name}
                     referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                    className="w-full h-full object-cover object-[center_20%] transition-transform duration-1000 group-hover:scale-105"
                   />
                   <div
                     className="absolute inset-0 shadow-[inset_0_0_15px_rgba(0,0,0,0.1)] pointer-events-none"

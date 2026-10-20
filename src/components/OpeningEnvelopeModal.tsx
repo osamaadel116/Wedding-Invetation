@@ -167,7 +167,7 @@ export const OpeningEnvelopeModal: React.FC<OpeningEnvelopeModalProps> = ({
               whileTap={{ scale: 0.97 }}
               onClick={handleOpen}
               disabled={isOpening}
-              className="group relative w-full py-3.5 px-6 rounded-full overflow-hidden shadow-lg transition-all duration-300 font-sans-body font-medium text-sm tracking-widest uppercase flex items-center justify-center gap-2.5 text-white cursor-pointer"
+              className="group relative w-full py-4 px-6 rounded-full overflow-hidden shadow-xl transition-all duration-300 flex items-center justify-center gap-2.5 text-white cursor-pointer"
               style={{
                 background: `linear-gradient(135deg, ${activeTheme.primaryColor} 0%, #3D2B24 100%)`,
               }}
@@ -175,9 +175,15 @@ export const OpeningEnvelopeModal: React.FC<OpeningEnvelopeModalProps> = ({
               {/* Button Sheen Effect */}
               <div className="absolute inset-0 w-1/2 h-full bg-white/20 skew-x-12 -translate-x-full group-hover:translate-x-[300%] transition-transform duration-1000 ease-in-out" />
 
-              <MailOpen className="w-4 h-4 text-[#F3E5AB] transition-transform group-hover:rotate-12" />
-              <span>{isOpening ? 'Opening Invitation...' : 'Open Invitation'}</span>
-              <Sparkles className="w-3.5 h-3.5 text-[#F3E5AB]" />
+              <MailOpen className="w-5 h-5 text-[#F3E5AB] transition-transform group-hover:rotate-12 shrink-0" />
+              <span
+                dir="rtl"
+                className="text-lg sm:text-xl font-bold text-white tracking-normal leading-none"
+                style={{ fontFamily: "'Amiri', 'Traditional Arabic', serif" }}
+              >
+                {isOpening ? 'جاري فتح الدعوة...' : 'افتح الدعوة'}
+              </span>
+              <Sparkles className="w-4 h-4 text-[#F3E5AB] shrink-0" />
             </motion.button>
 
             {/* Couple Hashtag */}

@@ -1,6 +1,6 @@
 import { WeddingConfig } from './types';
-import bridePhoto from './assets/images/regenerated_image_1788213800123.png';
-import groomPhoto from './assets/images/regenerated_image_1788214059017.jpg';
+import bridePhoto from './assets/images/bride_aya.jpeg';
+import groomPhoto from './assets/images/groom_omar.jpeg';
 import heroPhoto from './assets/images/hero_engagement.jfif';
 import customWeddingData from './weddingData.json';
 
