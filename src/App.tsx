@@ -6,7 +6,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { weddingConfig as initialWeddingConfig } from './weddingConfig';
-import { WeddingConfig, GuestWish } from './types';
+import { WeddingConfig, GuestWish, MusicTrack } from './types';
 import { OpeningEnvelopeModal } from './components/OpeningEnvelopeModal';
 import { MusicPlayer } from './components/MusicPlayer';
 import { HeroSection } from './components/HeroSection';
@@ -49,21 +49,23 @@ export default function App() {
               ...initialWeddingConfig.couple.groom,
               ...(parsed.couple?.groom || {}),
               photoUrl:
-                parsed.couple?.groom?.photoUrl &&
+                (typeof window !== 'undefined' && localStorage.getItem('wedding_custom_groom_photo')) ||
+                (parsed.couple?.groom?.photoUrl &&
                 !parsed.couple.groom.photoUrl.startsWith('/src/') &&
                 !parsed.couple.groom.photoUrl.includes('photo-1507003211169') &&
                 !parsed.couple.groom.photoUrl.includes('photo-1506794778202')
                   ? parsed.couple.groom.photoUrl
-                  : initialWeddingConfig.couple.groom.photoUrl,
+                  : initialWeddingConfig.couple.groom.photoUrl),
             },
             bride: {
               ...initialWeddingConfig.couple.bride,
               ...(parsed.couple?.bride || {}),
               photoUrl:
-                parsed.couple?.bride?.photoUrl &&
+                (typeof window !== 'undefined' && localStorage.getItem('wedding_custom_bride_photo')) ||
+                (parsed.couple?.bride?.photoUrl &&
                 !parsed.couple.bride.photoUrl.startsWith('/src/')
                   ? parsed.couple.bride.photoUrl
-                  : initialWeddingConfig.couple.bride.photoUrl,
+                  : initialWeddingConfig.couple.bride.photoUrl),
             },
             quote:
               parsed.couple?.quote?.source === 'Colossians 3:14' || !parsed.couple?.quote?.arabicText || parsed.couple?.quote?.text?.includes('tranquility in them')
@@ -96,18 +98,26 @@ export default function App() {
               : initialWeddingConfig.events,
           themes: Array.isArray(parsed.themes) && parsed.themes.length > 0 ? parsed.themes : initialWeddingConfig.themes,
           gallery: Array.isArray(parsed.gallery) && parsed.gallery.length > 0
-            ? parsed.gallery.map((g: any, i: number) =>
-                i === 0 || !g.url || g.url.startsWith('/src/') || g.url.includes('regenerated_image_1788214150346')
-                  ? { ...g, url: initialWeddingConfig.gallery[0]?.url }
-                  : g
-              )
+            ? parsed.gallery.map((g: any, i: number) => {
+                const customHero = typeof window !== 'undefined' ? localStorage.getItem('wedding_custom_hero_photo') : null;
+                if (i === 0) {
+                  return {
+                    ...g,
+                    url: initialWeddingConfig.gallery[0]?.url,
+                  };
+                }
+                return g;
+              })
             : initialWeddingConfig.gallery,
-          musicTracks:
-            Array.isArray(parsed.musicTracks) && parsed.musicTracks.length > 0
-              ? parsed.musicTracks.filter((t: any) => t.title?.includes('Canon in D') || t.id === 'canon-piano').length > 0
-                ? parsed.musicTracks.filter((t: any) => t.title?.includes('Canon in D') || t.id === 'canon-piano')
-                : initialWeddingConfig.musicTracks
-              : initialWeddingConfig.musicTracks,
+          musicTracks: (() => {
+            const rawTracks = (Array.isArray(parsed.musicTracks) && parsed.musicTracks.length > 0)
+              ? parsed.musicTracks
+              : initialWeddingConfig.musicTracks;
+            const nonCanonTracks = (rawTracks || []).filter(
+              (t: any) => !t.title?.toLowerCase().includes('canon in d') && t.id !== 'canon-piano' && t.id !== 'canon-d'
+            );
+            return nonCanonTracks.length > 0 ? nonCanonTracks : initialWeddingConfig.musicTracks;
+          })(),
           timeline: Array.isArray(parsed.timeline) && parsed.timeline.length > 0 ? parsed.timeline : initialWeddingConfig.timeline,
           giftAccounts: Array.isArray(parsed.giftAccounts) && parsed.giftAccounts.length > 0 ? parsed.giftAccounts : initialWeddingConfig.giftAccounts,
           giftRegistries: Array.isArray(parsed.giftRegistries) && parsed.giftRegistries.length > 0 ? parsed.giftRegistries : initialWeddingConfig.giftRegistries,
@@ -342,6 +352,76 @@ export default function App() {
   };
 
 
+  const handleUpdateHeroPhoto = (newPhotoUrl: string) => {
+    setConfig((prev) => {
+      const updatedGallery = [
+        { ...prev.gallery[0], url: newPhotoUrl },
+        ...prev.gallery.slice(1),
+      ];
+      const updated = {
+        ...prev,
+        gallery: updatedGallery,
+      };
+      try {
+        localStorage.setItem('wedding_custom_config', JSON.stringify(updated));
+        localStorage.setItem('wedding_custom_hero_photo', newPhotoUrl);
+      } catch {}
+      return updated;
+    });
+  };
+
+  const handleUpdateGroomPhoto = (newPhotoUrl: string) => {
+    setConfig((prev) => {
+      const updated = {
+        ...prev,
+        couple: {
+          ...prev.couple,
+          groom: { ...prev.couple.groom, photoUrl: newPhotoUrl },
+        },
+      };
+      try {
+        localStorage.setItem('wedding_custom_config', JSON.stringify(updated));
+        localStorage.setItem('wedding_custom_groom_photo', newPhotoUrl);
+      } catch {}
+      return updated;
+    });
+  };
+
+  const handleUpdateBridePhoto = (newPhotoUrl: string) => {
+    setConfig((prev) => {
+      const updated = {
+        ...prev,
+        couple: {
+          ...prev.couple,
+          bride: { ...prev.couple.bride, photoUrl: newPhotoUrl },
+        },
+      };
+      try {
+        localStorage.setItem('wedding_custom_config', JSON.stringify(updated));
+        localStorage.setItem('wedding_custom_bride_photo', newPhotoUrl);
+      } catch {}
+      return updated;
+    });
+  };
+
+  const handleUploadSong = (newTrack: MusicTrack) => {
+    setConfig((prev) => {
+      const updatedTracks = [newTrack, ...(prev.musicTracks || []).filter((t) => t.id !== newTrack.id)];
+      const updated = {
+        ...prev,
+        musicTracks: updatedTracks,
+        defaultTrackIndex: 0,
+      };
+      try {
+        localStorage.setItem('wedding_custom_config', JSON.stringify(updated));
+        localStorage.setItem('wedding_custom_audio', JSON.stringify(newTrack));
+      } catch {}
+      return updated;
+    });
+    setCurrentTrackIndex(0);
+    setIsPlayingMusic(true);
+  };
+
   const handleNavigate = (sectionId: string) => {
     setActiveSection(sectionId);
     const elem = document.getElementById(sectionId);
@@ -376,6 +456,7 @@ export default function App() {
         isPlaying={isPlayingMusic}
         onTrackChange={(idx) => setCurrentTrackIndex(idx)}
         onTogglePlay={(playing) => setIsPlayingMusic(playing)}
+        onUploadSong={handleUploadSong}
         accentColor={activeTheme.primaryColor}
       />
 
@@ -416,10 +497,19 @@ export default function App() {
         )}
 
         {/* 1. Hero Cover & Countdown Scene */}
-        <HeroSection config={config} onScrollToNext={() => handleNavigate('couple')} />
+        <HeroSection
+          config={config}
+          onScrollToNext={() => handleNavigate('couple')}
+          onUpdateHeroPhoto={handleUpdateHeroPhoto}
+        />
 
         {/* 2. The Beloved Couple Scene (Groom & Bride) */}
-        <CoupleSection couple={config.couple} theme={activeTheme} />
+        <CoupleSection
+          couple={config.couple}
+          theme={activeTheme}
+          onUpdateGroomPhoto={handleUpdateGroomPhoto}
+          onUpdateBridePhoto={handleUpdateBridePhoto}
+        />
 
         {/* 3. Event Schedules & Venues Scene */}
         <EventsSchedule events={config.events} theme={activeTheme} />

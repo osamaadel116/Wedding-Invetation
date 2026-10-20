@@ -32,6 +32,79 @@ function saveConfigPlugin(): Plugin {
           res.end();
         }
       });
+
+      server.middlewares.use('/api/upload-image', (req, res) => {
+        if (req.method === 'POST') {
+          let body = '';
+          req.on('data', (chunk) => {
+            body += chunk;
+          });
+          req.on('end', () => {
+            try {
+              const { imageBase64, targetName } = JSON.parse(body);
+              const fileName = targetName && /^[a-zA-Z0-9_.-]+\.(jpg|jpeg|png|webp)$/i.test(targetName)
+                ? targetName
+                : 'uploaded_image.jpg';
+              if (imageBase64) {
+                const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, '');
+                const buffer = Buffer.from(base64Data, 'base64');
+                const targetDir = path.resolve(__dirname, 'src/assets/images');
+                if (!fs.existsSync(targetDir)) {
+                  fs.mkdirSync(targetDir, { recursive: true });
+                }
+                fs.writeFileSync(path.resolve(targetDir, fileName), buffer);
+
+                const publicDir = path.resolve(__dirname, 'public');
+                if (!fs.existsSync(publicDir)) {
+                  fs.mkdirSync(publicDir, { recursive: true });
+                }
+                fs.writeFileSync(path.resolve(publicDir, fileName), buffer);
+              }
+              res.setHeader('Content-Type', 'application/json');
+              res.statusCode = 200;
+              res.end(JSON.stringify({ success: true, url: `/${fileName}` }));
+            } catch (err: any) {
+              res.statusCode = 500;
+              res.end(JSON.stringify({ error: err.message }));
+            }
+          });
+        } else {
+          res.statusCode = 405;
+          res.end();
+        }
+      });
+
+      server.middlewares.use('/api/upload-audio', (req, res) => {
+        if (req.method === 'POST') {
+          let body = '';
+          req.on('data', (chunk) => {
+            body += chunk;
+          });
+          req.on('end', () => {
+            try {
+              const { audioBase64, fileName = 'wedding_song.mp3' } = JSON.parse(body);
+              if (audioBase64) {
+                const base64Data = audioBase64.replace(/^data:audio\/\w+;base64,/, '');
+                const buffer = Buffer.from(base64Data, 'base64');
+                const publicDir = path.resolve(__dirname, 'public');
+                if (!fs.existsSync(publicDir)) {
+                  fs.mkdirSync(publicDir, { recursive: true });
+                }
+                fs.writeFileSync(path.resolve(publicDir, fileName), buffer);
+              }
+              res.setHeader('Content-Type', 'application/json');
+              res.statusCode = 200;
+              res.end(JSON.stringify({ success: true, url: `/${fileName}` }));
+            } catch (err: any) {
+              res.statusCode = 500;
+              res.end(JSON.stringify({ error: err.message }));
+            }
+          });
+        } else {
+          res.statusCode = 405;
+          res.end();
+        }
+      });
     },
   };
 }

@@ -4,11 +4,12 @@ import { Calendar, Clock, MapPin, Sparkles, ChevronDown, Heart } from 'lucide-re
 import { WeddingConfig } from '../types';
 import { WatercolorCorner, WatercolorWreath, WatercolorDivider } from './WatercolorFlorals';
 import { BotanicalRoseFrameCorner, BotanicalRoseArchCrown, GoldenRococoOvalFrame } from './BotanicalRoseDecorations';
-import heroPhoto from '../assets/images/regenerated_image_1788214150346.jpg';
+import heroPhoto from '../assets/images/hero_engagement.jfif';
 
 interface HeroSectionProps {
   config: WeddingConfig;
   onScrollToNext?: () => void;
+  onUpdateHeroPhoto?: (newPhotoUrl: string) => void;
 }
 
 // Safe date parsing helper to prevent Invalid Time Value crashes
@@ -127,22 +128,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ config, onScrollToNext
               style={{ borderRadius: '50% / 50%' }}
             >
               <img
-                src={
-                  config.gallery[0]?.url &&
-                  !config.gallery[0].url.startsWith('/src/') &&
-                  !config.gallery[0].url.includes('regenerated_image_1788214150346')
-                    ? config.gallery[0].url
-                    : heroPhoto
-                }
-                alt="The Happy Couple"
-                onError={(e) => {
-                  const target = e.currentTarget;
-                  if (target.src !== heroPhoto) {
-                    target.src = heroPhoto;
-                  }
-                }}
+                src={heroPhoto}
+                alt="The Happy Couple - Omar & Aya"
                 referrerPolicy="no-referrer"
-                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                className="w-full h-full object-cover object-[center_30%] transition-transform duration-1000 group-hover:scale-105"
               />
               <div 
                 className="absolute inset-0 shadow-[inset_0_0_20px_rgba(0,0,0,0.15)] pointer-events-none" 

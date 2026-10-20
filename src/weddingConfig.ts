@@ -1,7 +1,7 @@
 import { WeddingConfig } from './types';
 import bridePhoto from './assets/images/regenerated_image_1788213800123.png';
 import groomPhoto from './assets/images/regenerated_image_1788214059017.jpg';
-import heroPhoto from './assets/images/regenerated_image_1788214150346.jpg';
+import heroPhoto from './assets/images/hero_engagement.jfif';
 import customWeddingData from './weddingData.json';
 
 /**
@@ -123,13 +123,13 @@ const baseWeddingConfig: WeddingConfig = {
     ],
   },
 
-  // 6. BACKGROUND MUSIC PLAYLIST (Royalty-free high quality wedding piano)
+  // 6. BACKGROUND MUSIC PLAYLIST
   musicTracks: [
     {
-      id: 'canon-piano',
-      title: 'Canon in D (Romantic Piano)',
-      artist: 'Johann Pachelbel (Acoustic)',
-      audioUrl: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=romantic-wedding-piano-112191.mp3',
+      id: 'alf-leila-we-leila',
+      title: 'ألف ليلة وليلة (Alf Leila We Leila)',
+      artist: 'أم كلثوم (Umm Kulthum)',
+      audioUrl: '/assets/aistudio/alf-leila-we-leila-umm-kulthum-alf-lyl-olylh-am-klthom-george_YX6jWVBZ_04fd770c.mp3',
     },
   ],
   defaultTrackIndex: 0,

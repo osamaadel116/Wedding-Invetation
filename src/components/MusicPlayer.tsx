@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Volume2, VolumeX, Play, Pause, SkipForward, SkipBack, Music, Disc3 } from 'lucide-react';
+import { Volume2, VolumeX, Play, Pause, SkipForward, SkipBack, Music, Disc3, Upload, Check } from 'lucide-react';
 import { MusicTrack } from '../types';
 
 interface MusicPlayerProps {
@@ -9,6 +9,7 @@ interface MusicPlayerProps {
   isPlaying: boolean;
   onTrackChange: (index: number) => void;
   onTogglePlay: (playing: boolean) => void;
+  onUploadSong?: (track: MusicTrack) => void;
   accentColor?: string;
 }
 
@@ -18,15 +19,55 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
   isPlaying,
   onTrackChange,
   onTogglePlay,
+  onUploadSong,
   accentColor = '#C38D9E',
 }) => {
   const [isMuted, setIsMuted] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [volume, setVolume] = useState(0.7);
   const [audioError, setAudioError] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const currentTrack = tracks[currentTrackIndex] || tracks[0];
+  const handleAudioFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const dataUrl = reader.result as string;
+      const cleanTitle = file.name.replace(/\.[^/.]+$/, '').slice(0, 40);
+      const newTrack: MusicTrack = {
+        id: 'uploaded-' + Date.now(),
+        title: cleanTitle || 'My Wedding Song',
+        artist: 'Custom Upload',
+        audioUrl: dataUrl,
+      };
+
+      if (onUploadSong) {
+        onUploadSong(newTrack);
+      }
+
+      try {
+        await fetch('/api/upload-audio', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ audioBase64: dataUrl, fileName: 'wedding_song.mp3' }),
+        });
+      } catch (err) {
+        console.warn('Backend audio save notice:', err);
+      }
+
+      setIsUploading(false);
+      setUploadSuccess(true);
+      setTimeout(() => setUploadSuccess(false), 3000);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const currentTrack = (tracks && tracks.length > 0) ? (tracks[currentTrackIndex] || tracks[0]) : null;
 
   // Synchronize audio playback with isPlaying prop
   useEffect(() => {
@@ -55,7 +96,7 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
   }, [volume, isMuted]);
 
   const handleTogglePlay = () => {
-    if (!audioRef.current) return;
+    if (!audioRef.current || !currentTrack) return;
     if (isPlaying) {
       audioRef.current.pause();
       onTogglePlay(false);
@@ -73,11 +114,13 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
   };
 
   const handleNextTrack = () => {
+    if (!tracks.length) return;
     const nextIdx = (currentTrackIndex + 1) % tracks.length;
     onTrackChange(nextIdx);
   };
 
   const handlePrevTrack = () => {
+    if (!tracks.length) return;
     const prevIdx = (currentTrackIndex - 1 + tracks.length) % tracks.length;
     onTrackChange(prevIdx);
   };
@@ -121,10 +164,10 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
               {/* Track Title & Artist */}
               <div className="text-center my-2">
                 <p className="font-serif-display font-semibold text-sm text-[#2E2723] line-clamp-1">
-                  {currentTrack?.title}
+                  {currentTrack ? currentTrack.title : 'No Song Selected'}
                 </p>
                 <p className="text-xs text-[#8C7A6B] italic font-sans-body">
-                  {currentTrack?.artist}
+                  {currentTrack ? currentTrack.artist : 'Upload your custom wedding MP3 below'}
                 </p>
               </div>
 
@@ -132,24 +175,27 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
               <div className="flex items-center justify-center gap-4 my-3">
                 <button
                   onClick={handlePrevTrack}
+                  disabled={!currentTrack || tracks.length <= 1}
                   title="Previous Song"
-                  className="p-2 text-[#7B6E65] hover:text-[#2E2723] transition-colors"
+                  className="p-2 text-[#7B6E65] hover:text-[#2E2723] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <SkipBack className="w-4 h-4" />
                 </button>
 
                 <button
                   onClick={handleTogglePlay}
-                  className="p-3 rounded-full text-white shadow-md transition-transform hover:scale-105"
+                  disabled={!currentTrack}
+                  className="p-3 rounded-full text-white shadow-md transition-transform hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed"
                   style={{ backgroundColor: accentColor }}
                 >
-                  {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
+                  {isPlaying && currentTrack ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
                 </button>
 
                 <button
                   onClick={handleNextTrack}
+                  disabled={!currentTrack || tracks.length <= 1}
                   title="Next Song"
-                  className="p-2 text-[#7B6E65] hover:text-[#2E2723] transition-colors"
+                  className="p-2 text-[#7B6E65] hover:text-[#2E2723] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <SkipForward className="w-4 h-4" />
                 </button>
@@ -208,9 +254,34 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({
                 </div>
               )}
 
+              {/* Quick Upload / Replace Song Button */}
+              <div className="mt-3 pt-2.5 border-t border-[#EADFCF]/60 flex justify-center">
+                <label className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-[#FAF7F2] hover:bg-[#F3ECE0] border border-[#DFC186] text-[#8C6D3B] text-xs font-semibold cursor-pointer transition-all hover:scale-[1.02] shadow-xs">
+                  {uploadSuccess ? (
+                    <>
+                      <Check className="w-4 h-4 text-emerald-600" />
+                      <span className="text-emerald-700">Song Updated & Playing!</span>
+                    </>
+                  ) : isUploading ? (
+                    <span className="animate-pulse">Loading Audio...</span>
+                  ) : (
+                    <>
+                      <Upload className="w-3.5 h-3.5 text-[#C5A059]" />
+                      <span>Upload My Own Song (MP3)</span>
+                    </>
+                  )}
+                  <input
+                    type="file"
+                    accept="audio/*"
+                    onChange={handleAudioFileChange}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+
               {audioError && (
                 <p className="text-[10px] text-amber-700 bg-amber-50 rounded p-1.5 mt-2 text-center">
-                  Audio streaming error. Click Play or check track URL.
+                  Audio streaming error. Click Play or upload an MP3 file.
                 </p>
               )}
             </motion.div>

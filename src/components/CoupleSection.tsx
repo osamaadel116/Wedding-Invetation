@@ -2,15 +2,21 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { Heart } from 'lucide-react';
 import { CoupleDetails, FloralTheme } from '../types';
-import { WatercolorCorner, WatercolorDivider } from './WatercolorFlorals';
-import { BotanicalRoseHeaderOrnament, BotanicalRoseFrameCorner, BotanicalRoseArchCrown, GoldenRococoOvalFrame } from './BotanicalRoseDecorations';
+import { WatercolorCorner } from './WatercolorFlorals';
+import { BotanicalRoseHeaderOrnament, GoldenRococoOvalFrame } from './BotanicalRoseDecorations';
 
 interface CoupleSectionProps {
   couple: CoupleDetails;
   theme: FloralTheme;
+  onUpdateGroomPhoto?: (url: string) => void;
+  onUpdateBridePhoto?: (url: string) => void;
 }
 
-export const CoupleSection: React.FC<CoupleSectionProps> = ({ couple, theme }) => {
+export const CoupleSection: React.FC<CoupleSectionProps> = ({
+  couple,
+  theme,
+}) => {
+
   return (
     <section id="couple" className="relative py-16 px-4 sm:px-6 bg-[#FAF7F2]/60 overflow-hidden">
       {/* Decorative Floral Accents */}
@@ -34,7 +40,11 @@ export const CoupleSection: React.FC<CoupleSectionProps> = ({ couple, theme }) =
           <h2 className="font-serif-display text-3xl sm:text-4xl font-bold text-[#2E2420] mt-1">
             Groom & Bride
           </h2>
-          <h3 dir="rtl" className="font-serif-display text-2xl sm:text-3xl font-bold text-[#2E2420] mt-1 mb-2" style={{ fontFamily: "'Amiri', 'Traditional Arabic', serif" }}>
+          <h3
+            dir="rtl"
+            className="font-serif-display text-2xl sm:text-3xl font-bold text-[#2E2420] mt-1 mb-2"
+            style={{ fontFamily: "'Amiri', 'Traditional Arabic', serif" }}
+          >
             العريس والعروس
           </h3>
           <BotanicalRoseHeaderOrnament theme={theme} className="my-2" />
@@ -45,7 +55,6 @@ export const CoupleSection: React.FC<CoupleSectionProps> = ({ couple, theme }) =
 
         {/* Groom & Bride Grid Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 items-center relative">
-          
           {/* THE GROOM CARD */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
@@ -58,13 +67,13 @@ export const CoupleSection: React.FC<CoupleSectionProps> = ({ couple, theme }) =
             <div className="relative mb-6 mt-3 group w-full flex justify-center items-center">
               <div className="relative w-48 sm:w-56 h-[17rem] sm:h-[20rem] flex items-center justify-center">
                 {/* The SVG Ornate Frame */}
-                <GoldenRococoOvalFrame 
-                  className="absolute inset-0 z-20 w-[100%] h-[100%] left-0 top-0 transition-transform duration-700 group-hover:scale-105" 
-                  strokeColor="#CBA153" 
+                <GoldenRococoOvalFrame
+                  className="absolute inset-0 z-20 w-[100%] h-[100%] left-0 top-0 transition-transform duration-700 group-hover:scale-105"
+                  strokeColor="#CBA153"
                 />
-                
+
                 {/* Oval Masked Image */}
-                <div 
+                <div
                   className="relative w-[75%] h-[80%] overflow-hidden bg-[#FAF7F2] z-10 shadow-lg"
                   style={{ borderRadius: '50% / 50%' }}
                 >
@@ -74,7 +83,7 @@ export const CoupleSection: React.FC<CoupleSectionProps> = ({ couple, theme }) =
                     referrerPolicy="no-referrer"
                     className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                   />
-                  <div 
+                  <div
                     className="absolute inset-0 shadow-[inset_0_0_15px_rgba(0,0,0,0.1)] pointer-events-none"
                     style={{ borderRadius: '50% / 50%' }}
                   />
@@ -111,13 +120,13 @@ export const CoupleSection: React.FC<CoupleSectionProps> = ({ couple, theme }) =
             <div className="relative mb-6 mt-3 group w-full flex justify-center items-center">
               <div className="relative w-48 sm:w-56 h-[17rem] sm:h-[20rem] flex items-center justify-center">
                 {/* The SVG Ornate Frame */}
-                <GoldenRococoOvalFrame 
-                  className="absolute inset-0 z-20 w-[100%] h-[100%] left-0 top-0 transition-transform duration-700 group-hover:scale-105" 
-                  strokeColor="#CBA153" 
+                <GoldenRococoOvalFrame
+                  className="absolute inset-0 z-20 w-[100%] h-[100%] left-0 top-0 transition-transform duration-700 group-hover:scale-105"
+                  strokeColor="#CBA153"
                 />
-                
+
                 {/* Oval Masked Image */}
-                <div 
+                <div
                   className="relative w-[75%] h-[80%] overflow-hidden bg-[#FAF7F2] z-10 shadow-lg"
                   style={{ borderRadius: '50% / 50%' }}
                 >
@@ -127,7 +136,7 @@ export const CoupleSection: React.FC<CoupleSectionProps> = ({ couple, theme }) =
                     referrerPolicy="no-referrer"
                     className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                   />
-                  <div 
+                  <div
                     className="absolute inset-0 shadow-[inset_0_0_15px_rgba(0,0,0,0.1)] pointer-events-none"
                     style={{ borderRadius: '50% / 50%' }}
                   />

@@ -20,6 +20,7 @@ import {
   Plus,
   ExternalLink,
   Save,
+  Upload,
 } from 'lucide-react';
 import { WeddingConfig } from '../types';
 
@@ -344,6 +345,38 @@ export const LiveConfigEditorModal: React.FC<LiveConfigEditorModalProps> = ({
                         className="w-full px-3 py-1.5 rounded-lg border border-[#DCD0C0] bg-[#FAF7F2]"
                       />
                     </div>
+                    <div>
+                      <label className="block text-[#8C7A6B] mb-0.5">Groom Photo</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          const reader = new FileReader();
+                          reader.onload = async () => {
+                            const dataUrl = reader.result as string;
+                            handleUpdate((prev) => ({
+                              ...prev,
+                              couple: {
+                                ...prev.couple,
+                                groom: { ...prev.couple.groom, photoUrl: dataUrl },
+                              },
+                            }));
+                            try {
+                              localStorage.setItem('wedding_custom_groom_photo', dataUrl);
+                              await fetch('/api/upload-image', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ imageBase64: dataUrl, targetName: 'groom_photo.jpg' }),
+                              });
+                            } catch {}
+                          };
+                          reader.readAsDataURL(file);
+                        }}
+                        className="w-full text-xs text-[#5C4524] file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#EFE8DD] file:text-[#8C6D3B] hover:file:bg-[#DFC186] cursor-pointer"
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -384,6 +417,101 @@ export const LiveConfigEditorModal: React.FC<LiveConfigEditorModalProps> = ({
                           }))
                         }
                         className="w-full px-3 py-1.5 rounded-lg border border-[#DCD0C0] bg-[#FAF7F2]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[#8C7A6B] mb-0.5">Bride Photo</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          const reader = new FileReader();
+                          reader.onload = async () => {
+                            const dataUrl = reader.result as string;
+                            handleUpdate((prev) => ({
+                              ...prev,
+                              couple: {
+                                ...prev.couple,
+                                bride: { ...prev.couple.bride, photoUrl: dataUrl },
+                              },
+                            }));
+                            try {
+                              localStorage.setItem('wedding_custom_bride_photo', dataUrl);
+                              await fetch('/api/upload-image', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ imageBase64: dataUrl, targetName: 'bride_photo.jpg' }),
+                              });
+                            } catch {}
+                          };
+                          reader.readAsDataURL(file);
+                        }}
+                        className="w-full text-xs text-[#5C4524] file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#EFE8DD] file:text-[#8C6D3B] hover:file:bg-[#DFC186] cursor-pointer"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-3 bg-white rounded-xl border border-[#E6DCce]">
+                  <h4 className="font-serif-display font-bold text-sm text-[#2E2420] mb-2 flex items-center justify-between">
+                    <span>Main Hero Cover Photo</span>
+                    <span className="text-[10px] text-[#8C7A6B] font-sans-body">Oval Rococo Frame</span>
+                  </h4>
+                  <div className="space-y-2">
+                    <div>
+                      <label className="block text-[#8C7A6B] mb-1">Upload New Photo from Device</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          const reader = new FileReader();
+                          reader.onload = async () => {
+                            const dataUrl = reader.result as string;
+                            handleUpdate((prev) => ({
+                              ...prev,
+                              gallery: [
+                                { ...prev.gallery[0], url: dataUrl },
+                                ...prev.gallery.slice(1),
+                              ],
+                            }));
+                            try {
+                              localStorage.setItem('wedding_custom_hero_photo', dataUrl);
+                              await fetch('/api/upload-hero-image', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ imageBase64: dataUrl }),
+                              });
+                            } catch {}
+                          };
+                          reader.readAsDataURL(file);
+                        }}
+                        className="w-full text-xs text-[#5C4524] file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#EFE8DD] file:text-[#8C6D3B] hover:file:bg-[#DFC186] cursor-pointer"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[#8C7A6B] mb-0.5">Or Paste Direct Image URL</label>
+                      <input
+                        type="text"
+                        placeholder="https://..."
+                        value={config.gallery[0]?.url || ''}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          handleUpdate((prev) => ({
+                            ...prev,
+                            gallery: [
+                              { ...prev.gallery[0], url: val },
+                              ...prev.gallery.slice(1),
+                            ],
+                          }));
+                          try {
+                            localStorage.setItem('wedding_custom_hero_photo', val);
+                          } catch {}
+                        }}
+                        className="w-full px-3 py-1.5 rounded-lg border border-[#DCD0C0] bg-[#FAF7F2] font-mono text-[11px]"
                       />
                     </div>
                   </div>
@@ -597,7 +725,7 @@ export const LiveConfigEditorModal: React.FC<LiveConfigEditorModalProps> = ({
                 <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
                   {(config.musicTracks || []).map((track, idx) => {
                     const isActive = config.defaultTrackIndex === idx;
-                    const canDelete = (config.musicTracks || []).length > 1;
+                    const canDelete = true;
 
                     return (
                       <div
@@ -663,10 +791,58 @@ export const LiveConfigEditorModal: React.FC<LiveConfigEditorModalProps> = ({
                   })}
                 </div>
 
+                {/* Upload MP3 File */}
+                <div className="p-3 bg-white rounded-xl border border-[#DFC186] space-y-2">
+                  <div className="flex items-center gap-1.5 font-serif-display font-bold text-xs text-[#2E2420]">
+                    <Upload className="w-4 h-4 text-[#C5A059]" />
+                    <span>Upload Your Wedding Song (MP3 / Audio)</span>
+                  </div>
+                  <p className="text-[11px] text-[#7A6B60]">
+                    Select any MP3 or audio track directly from your device. It will automatically play when guests open the invitation.
+                  </p>
+                  <input
+                    type="file"
+                    accept="audio/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = async () => {
+                        const dataUrl = reader.result as string;
+                        const cleanTitle = file.name.replace(/\.[^/.]+$/, '').slice(0, 40);
+                        const newTrack = {
+                          id: 'uploaded-' + Date.now(),
+                          title: cleanTitle || 'My Wedding Song',
+                          artist: 'Custom Upload',
+                          audioUrl: dataUrl,
+                        };
+                        handleUpdate((prev) => {
+                          const updatedTracks = [newTrack, ...(prev.musicTracks || []).filter((t) => t.id !== newTrack.id)];
+                          return {
+                            ...prev,
+                            musicTracks: updatedTracks,
+                            defaultTrackIndex: 0,
+                          };
+                        });
+                        try {
+                          localStorage.setItem('wedding_custom_audio', JSON.stringify(newTrack));
+                          await fetch('/api/upload-audio', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ audioBase64: dataUrl, fileName: 'wedding_song.mp3' }),
+                          });
+                        } catch {}
+                      };
+                      reader.readAsDataURL(file);
+                    }}
+                    className="w-full text-xs text-[#5C4524] file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#EFE8DD] file:text-[#8C6D3B] hover:file:bg-[#DFC186] cursor-pointer"
+                  />
+                </div>
+
                 <div className="pt-3 border-t border-[#E8DECf] space-y-2 bg-white/70 p-3 rounded-xl border border-[#E8DECf]/80">
                   <div className="flex items-center gap-1.5 font-serif-display font-bold text-xs text-[#2E2420]">
                     <Plus className="w-3.5 h-3.5 text-[#C5A059]" />
-                    <span>Add Custom Song</span>
+                    <span>Or Add by Music URL</span>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">

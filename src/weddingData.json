@@ -113,10 +113,10 @@
   },
   "musicTracks": [
     {
-      "id": "canon-piano",
-      "title": "Canon in D (Romantic Piano)",
-      "artist": "Johann Pachelbel (Acoustic)",
-      "audioUrl": "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=romantic-wedding-piano-112191.mp3"
+      "id": "alf-leila-we-leila",
+      "title": "ألف ليلة وليلة (Alf Leila We Leila)",
+      "artist": "أم كلثوم (Umm Kulthum)",
+      "audioUrl": "/assets/aistudio/alf-leila-we-leila-umm-kulthum-alf-lyl-olylh-am-klthom-george_YX6jWVBZ_04fd770c.mp3"
     }
   ],
   "defaultTrackIndex": 0,
